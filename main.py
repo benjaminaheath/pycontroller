@@ -1,4 +1,6 @@
-import time as t
+import time
+from machine import Pin
+
 
 class RGB:
     def __init__(self, name, r, g, b):
@@ -95,10 +97,16 @@ class PyController:
     def __init__(self, pin_r, pin_g, pin_b):
         self.RGB = RGB("Pins", 0, 0, 0)
         self.PWM_Period_ms = 50
-        self.Pin_R = pin_r
-        self.Pin_G = pin_g
-        self.Pin_B = pin_b
-        self.StartTime = t.time()
+
+        self.Pin_R = Pin(pin_r)
+        self.Pin_G = Pin(pin_g)
+        self.Pin_B = Pin(pin_b)
+
+
+        self.StartTime = time.localtime()
+
+    def update(self):
+        pass
 
     def update_pins(self, pin_r, pin_g, pin_b):
         self.RGB = RGB("Pins", pin_r, pin_g, pin_b)
