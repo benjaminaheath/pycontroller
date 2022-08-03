@@ -1,3 +1,4 @@
+import math
 import time
 import colours
 
@@ -12,9 +13,6 @@ class BaseMode:
         self.R = rgb.R
         self.G = rgb.G
         self.B = rgb.B
-
-    def update(self):
-        pass
 
 
 class BaseColourMode(BaseMode):
@@ -37,18 +35,29 @@ class BasePairMode(BaseColourMode):
 
 class BaseTimeMode(BaseMode):
     def __init__(self, period_ms):
+        print("Running Base Time Constructor")
         super().__init__()
         self.Period_ms = period_ms
-        self.Prev_Time_ms = None
-        self.Present_Time_ms = time.ticks_ms()
-        self.Diff_ms = None
+        self.Old_Time_ms = None
+        self.Start_Time_ms = time.ticks_ms()
+        self.New_Time_ms = self.Start_Time_ms
+        self.Period_Phase_ms = None
+        self.Phase = None
+        self.Phase_Degrees = None
+        self.Phase_Rads = None
 
     def set_period_ms(self, period_ms):
         self.Period_ms = period_ms
 
     def update_time(self):
-        self.Prev_Time_ms = self.Present_Time_ms
-        self.Prev_Time_ms = time.ticks_ms()
+        print("Updating Time")
+        self.Old_Time_ms = self.New_Time_ms
+        self.New_Time_ms = time.ticks_ms()
+        self.Period_Phase_ms = time.ticks_diff(self.Start_Time_ms, self.New_Time_ms) % self.Period_ms
+        print("Calculated Period Phase Differential")
+        self.Phase = self.Period_Phase_ms / self.Period_ms
+        self.Phase_Degrees = self.Phase * 360
+        self.Phase_Rads = self.Phase * 2 * math.pi
 
 
 # SolidMode inherits only from BaseMode as it does not vary by time
@@ -57,17 +66,23 @@ class SolidMode(BaseColourMode):
         super().__init__()
 
     def update(self):
-        super().set_pins(super().Colour_Primary)
-        pass
+        self.set_pins(self.Colour_Primary)
 
 
 # FadeMode inherits from BaseColourMode and BaseTimeMode
 class FadeMode(BaseColourMode, BaseTimeMode):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, period_ms):
+        super().__init__(period_ms=period_ms)
+
+    def fade(self, col):
+        return abs(math.sin(self.Phase_Rads)) * col
 
     def update(self):
-        super(BaseTimeMode).update_time()
+        self.update_time()
+        print("Updated Time")
+        self.R = self.fade(self.Colour_Primary.R)
+        self.G = self.fade(self.Colour_Primary.G)
+        self.B = self.fade(self.Colour_Primary.B)
         pass
 
 
@@ -91,7 +106,7 @@ class RainbowMode(BaseTimeMode):
 
 modes = {
     "Solid": SolidMode(),
-    "Fade": FadeMode(),
+    "Fade": FadeMode(5000),
     "Pair Fade": PairFadeMode(),
     "Rainbow": RainbowMode()
 }

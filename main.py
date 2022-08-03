@@ -1,6 +1,6 @@
 from machine import PWM, Pin
 import time
-import colours
+# import colours as col
 from mode import modes
 
 
@@ -15,14 +15,16 @@ class PyController:
         self.PWM_G = PWM(self.Pin_G)
         self.PWM_B = PWM(self.Pin_B)
         # Configure PWM Parameters
-        self.PWM_R.freq(1000)
-        self.PWM_G.freq(1000)
-        self.PWM_B.freq(1000)
+        self.PWM_R.freq(10000)
+        self.PWM_G.freq(10000)
+        self.PWM_B.freq(10000)
         # Default Mode as Solid, Off
-        self.mode = modes["Solid"]
-        self.mode.set_colour(colours.index["Red"])
+        self.mode = modes["Fade"]
+        self.mode.set_colour("Gray")
+        self.mode.set_period_ms(10000)
 
     def update(self):
+        self.mode.update()
         self.PWM_R.duty_u16(256*(self.mode.R+1))
         self.PWM_G.duty_u16(256*(self.mode.G+1))
         self.PWM_B.duty_u16(256*(self.mode.B+1))
@@ -34,8 +36,6 @@ class PyController:
 
 
 LED = PyController(0, 1, 2)
-LED.mode.set_colour(colours.index["Red"])
-
 while True:
     LED.update()
     time.sleep_ms(10)
