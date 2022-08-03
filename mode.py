@@ -89,7 +89,9 @@ class PairFadeMode(BaseTimeMode, BasePairMode):
         BasePairMode.__init__(self, colour_primary=colour_primary, colour_secondary=colour_secondary)
 
     def pair_fade(self, col1, col2):
-        return round((abs(0.5 * math.sin(self.Phase_Rads) + 0.5) * col1 + abs(0.5 * math.cos(self.Phase_Rads) + 0.5) * col2)/2)
+        c1 = abs(0.5 * math.sin(self.Phase_Rads) + 0.5) * col1
+        c2 = abs(0.5 * math.cos(self.Phase_Rads) + 0.5) * col2
+        return round((c1+c2)/2)
 
     def update(self):
         self.update_time()
@@ -111,6 +113,7 @@ class RainbowMode(BaseTimeMode):
         self.R = self.rainbow(0)
         self.G = self.rainbow(2 * math.pi / 3)
         self.B = self.rainbow(4 * math.pi / 3)
+
 
 modes = {
     "Solid": SolidMode(colours.index["Red"]),
