@@ -6,7 +6,7 @@ class RGB:
         self.B = b
 
 
-colours = {
+index = {
     "Off": RGB("Off", 0, 0, 0),
     "White": RGB("White", 255, 255, 255),
     "Light Gray": RGB("Light Gray", 224, 224, 224),
