@@ -1,6 +1,6 @@
 import math
-import time
 import colours
+import time
 
 
 class BaseMode:
@@ -16,18 +16,18 @@ class BaseMode:
 
 
 class BaseColourMode(BaseMode):
-    def __init__(self):
-        super().__init__()
-        self.Colour_Primary = colours.index["Off"]
+    def __init__(self, colour_primary):
+        BaseMode.__init__(self)
+        self.Colour_Primary = colour_primary
 
     def set_colour(self, colour):
         self.Colour_Primary = colours.index[colour]
 
 
 class BasePairMode(BaseColourMode):
-    def __init__(self):
-        super().__init__()
-        self.Colour_Secondary = colours.index["Off"]
+    def __init__(self, colour_primary, colour_secondary):
+        super().__init__(colour_primary=colour_primary)
+        self.Colour_Secondary = colour_secondary
 
     def set_alt_colour(self, alt_colour):
         self.Colour_Secondary = colours.index[alt_colour]
@@ -35,8 +35,7 @@ class BasePairMode(BaseColourMode):
 
 class BaseTimeMode(BaseMode):
     def __init__(self, period_ms):
-        print("Running Base Time Constructor")
-        super().__init__()
+        BaseMode.__init__(self)
         self.Period_ms = period_ms
         self.Old_Time_ms = None
         self.Start_Time_ms = time.ticks_ms()
@@ -50,11 +49,9 @@ class BaseTimeMode(BaseMode):
         self.Period_ms = period_ms
 
     def update_time(self):
-        print("Updating Time")
         self.Old_Time_ms = self.New_Time_ms
         self.New_Time_ms = time.ticks_ms()
         self.Period_Phase_ms = time.ticks_diff(self.Start_Time_ms, self.New_Time_ms) % self.Period_ms
-        print("Calculated Period Phase Differential")
         self.Phase = self.Period_Phase_ms / self.Period_ms
         self.Phase_Degrees = self.Phase * 360
         self.Phase_Rads = self.Phase * 2 * math.pi
@@ -62,37 +59,43 @@ class BaseTimeMode(BaseMode):
 
 # SolidMode inherits only from BaseMode as it does not vary by time
 class SolidMode(BaseColourMode):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, colour_primary):
+        super().__init__(colour_primary=colour_primary)
 
     def update(self):
         self.set_pins(self.Colour_Primary)
 
 
-# FadeMode inherits from BaseColourMode and BaseTimeMode
-class FadeMode(BaseColourMode, BaseTimeMode):
-    def __init__(self, period_ms):
-        super().__init__(period_ms=period_ms)
+# PulseMode inherits from BaseColourMode and BaseTimeMode
+class PulseMode(BaseTimeMode, BaseColourMode):
+    def __init__(self, period_ms, colour_primary):
+        BaseTimeMode.__init__(self, period_ms=period_ms)
+        BaseColourMode.__init__(self, colour_primary=colour_primary)
 
-    def fade(self, col):
-        return abs(math.sin(self.Phase_Rads)) * col
+    def pulse(self, col):
+        return round(abs(0.5*math.sin(self.Phase_Rads)+0.5) * col)
 
     def update(self):
         self.update_time()
-        print("Updated Time")
-        self.R = self.fade(self.Colour_Primary.R)
-        self.G = self.fade(self.Colour_Primary.G)
-        self.B = self.fade(self.Colour_Primary.B)
-        pass
+        self.R = self.pulse(self.Colour_Primary.R)
+        self.G = self.pulse(self.Colour_Primary.G)
+        self.B = self.pulse(self.Colour_Primary.B)
 
 
 # PairFadeMode inherits from BasePairMode and BaseTimeMode
-class PairFadeMode(BasePairMode, BaseTimeMode):
-    def __init__(self):
-        super().__init__()
+class PairFadeMode(BaseTimeMode, BasePairMode):
+    def __init__(self, period_ms, colour_primary, colour_secondary):
+        BaseTimeMode.__init__(self, period_ms=period_ms)
+        BasePairMode.__init__(self, colour_primary=colour_primary, colour_secondary=colour_secondary)
+
+    def pair_fade(self, col1, col2):
+        return round((abs(0.5 * math.sin(self.Phase_Rads) + 0.5) * col1 + abs(0.5 * math.cos(self.Phase_Rads) + 0.5) * col2)/2)
 
     def update(self):
-        pass
+        self.update_time()
+        self.R = self.pair_fade(self.Colour_Primary.R, self.Colour_Secondary.R)
+        self.G = self.pair_fade(self.Colour_Primary.G, self.Colour_Secondary.G)
+        self.B = self.pair_fade(self.Colour_Primary.B, self.Colour_Secondary.B)
 
 
 # RainbowMode inherits from only BaseTimeMode as no colour is selected
@@ -100,13 +103,18 @@ class RainbowMode(BaseTimeMode):
     def __init__(self):
         super().__init__(10000)
 
-    def update(self):
-        pass
+    def rainbow(self, shift_rads):
+        return round(abs(0.5*math.sin(self.Phase_Rads+shift_rads)+0.5) * 255)
 
+    def update(self):
+        self.update_time()
+        self.R = self.rainbow(0)
+        self.G = self.rainbow(2 * math.pi / 3)
+        self.B = self.rainbow(4 * math.pi / 3)
 
 modes = {
-    "Solid": SolidMode(),
-    "Fade": FadeMode(5000),
-    "Pair Fade": PairFadeMode(),
+    "Solid": SolidMode(colours.index["Red"]),
+    "Pulse": PulseMode(5000, colours.index["Red"]),
+    "Pair Fade": PairFadeMode(5000, colours.index["Red"], colours.index["Green"]),
     "Rainbow": RainbowMode()
 }
