@@ -7,7 +7,7 @@ ssid = 'Heathfamilywifi'
 password = 'Heath123'
 
 serv_sock_IP = '192.168.1.137'
-serv_sock_PORT = 81
+serv_sock_PORT = 82
 
 html = """<!DOCTYPE html>
 <html>
