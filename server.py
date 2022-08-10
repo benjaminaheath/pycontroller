@@ -1,13 +1,14 @@
 import network
 import socket
 import colours
-import mode
+import mode as controller_mode
+import main
 
 ssid = 'Heathfamilywifi'
 password = 'Heath123'
 
 serv_sock_IP = '192.168.1.137'
-serv_sock_PORT = 82
+serv_sock_PORT = 81
 
 html = """<!DOCTYPE html>
 <html>
@@ -45,7 +46,7 @@ def serv_handle():
             data = str(client_sock.recv(2048))
             print(f"Request Received from:{client_addr}\r\n")
 
-            for m in mode.modes.keys():
+            for m in controller_mode.modes.keys():
                 uri = f'/mode/{m}'
                 if data.find(uri) == 6:
                     mode = m
@@ -60,6 +61,7 @@ def serv_handle():
             if data.find('/period_ms/') == 6:
                 period_ms = int(data[17:data.find(' ', 17)])
             response = html.format(mode, primary_colour, secondary_colour, period_ms)
+
             client_sock.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
             client_sock.send(response)
             client_sock.close()

@@ -123,6 +123,6 @@ class RainbowMode(BaseTimeMode):
 modes = {
     "Solid": SolidMode(colours.index["Red"]),
     "Pulse": PulseMode(5000, colours.index["Red"]),
-    "Pair Fade": PairFadeMode(5000, colours.index["Red"], colours.index["Green"]),
+    "Pair_Fade": PairFadeMode(5000, colours.index["Red"], colours.index["Green"]),
     "Rainbow": RainbowMode()
 }
