@@ -5,6 +5,7 @@ import time
 
 class BaseMode:
     def __init__(self):
+        self.Name = None
         self.R = 0
         self.G = 0
         self.B = 0
@@ -61,6 +62,7 @@ class BaseTimeMode(BaseMode):
 class SolidMode(BaseColourMode):
     def __init__(self, colour_primary):
         super().__init__(colour_primary=colour_primary)
+        self.Name="Solid"
 
     def update(self):
         self.set_pins(self.Colour_Primary)
@@ -71,6 +73,7 @@ class PulseMode(BaseTimeMode, BaseColourMode):
     def __init__(self, period_ms, colour_primary):
         BaseTimeMode.__init__(self, period_ms=period_ms)
         BaseColourMode.__init__(self, colour_primary=colour_primary)
+        self.Name = "Pulse"
 
     def pulse(self, col):
         return round(abs(0.5*math.sin(self.Phase_Rads)+0.5) * col)
@@ -87,6 +90,7 @@ class PairFadeMode(BaseTimeMode, BasePairMode):
     def __init__(self, period_ms, colour_primary, colour_secondary):
         BaseTimeMode.__init__(self, period_ms=period_ms)
         BasePairMode.__init__(self, colour_primary=colour_primary, colour_secondary=colour_secondary)
+        self.Name = "Pair Fade"
 
     def pair_fade(self, col1, col2):
         c1 = abs(0.5 * math.sin(self.Phase_Rads) + 0.5) * col1
@@ -104,6 +108,7 @@ class PairFadeMode(BaseTimeMode, BasePairMode):
 class RainbowMode(BaseTimeMode):
     def __init__(self):
         super().__init__(10000)
+        self.Name = "Rainbow"
 
     def rainbow(self, shift_rads):
         return round(abs(0.5*math.sin(self.Phase_Rads+shift_rads)+0.5) * 255)
@@ -118,6 +123,6 @@ class RainbowMode(BaseTimeMode):
 modes = {
     "Solid": SolidMode(colours.index["Red"]),
     "Pulse": PulseMode(5000, colours.index["Red"]),
-    "Pair Fade": PairFadeMode(5000, colours.index["Red"], colours.index["Green"]),
+    "Pair_Fade": PairFadeMode(5000, colours.index["Red"], colours.index["Green"]),
     "Rainbow": RainbowMode()
 }
