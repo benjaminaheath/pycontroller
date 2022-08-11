@@ -2,15 +2,20 @@ from machine import PWM, Pin
 import mode
 import time
 
-class PyController:
 
+class PyController:
     def __init__(self, pin_r, pin_g, pin_b):
+        # Initialise controller model attributes
+        self.mode = None
+        self.primary_colour = None
+        self.secondary_colour = None
+        self.period_ms = None
+
         # Configure Pins as Pin Objects
         self.Pin_R = Pin(pin_r)
         self.Pin_G = Pin(pin_g)
         self.Pin_B = Pin(pin_b)
         # Configure Pin Objects as PWM
-
         self.PWM_R = PWM(self.Pin_R)
         self.PWM_G = PWM(self.Pin_G)
         self.PWM_B = PWM(self.Pin_B)
@@ -18,10 +23,6 @@ class PyController:
         self.PWM_R.freq(100000)
         self.PWM_G.freq(100000)
         self.PWM_B.freq(100000)
-
-        # Default Mode as Solid, Off
-        self.mode = mode.modes["Rainbow"]
-        self.mode.set_period_ms(10000)
 
     def update(self):
         self.mode.update()

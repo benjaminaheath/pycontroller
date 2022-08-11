@@ -2,7 +2,7 @@ import network
 import socket
 import colours
 import mode as controller_mode
-import main
+from main import LED as m
 
 ssid = 'Heathfamilywifi'
 password = 'Heath123'
@@ -31,37 +31,42 @@ def connect_wlan():
 
 
 def serv_handle():
+    # TODO: make global variable main.LED pycontroller instance accessible in server.py
+    global m
     # Accept new connections in an infinite loop
     serv_addr = socket.getaddrinfo(serv_sock_IP, serv_sock_PORT)[0][-1]
     serv_sock = socket.socket()
     serv_sock.bind(serv_addr)
     serv_sock.listen(1)
-    mode = "None"
-    primary_colour = "None"
-    secondary_colour = "None"
-    period_ms = 1000
     while True:
         try:
+            # Wait for client HTTP GET request on server TCP socket
             client_sock, client_addr = serv_sock.accept()
             data = str(client_sock.recv(2048))
             print(f"Request Received from:{client_addr}\r\n")
 
-            for m in controller_mode.modes.keys():
-                uri = f'/mode/{m}'
+            # Search for URI in HTTP GET request, if hit, update Controller Model
+            for mo in controller_mode.modes.keys():
+                uri = f'/mode/{mo}'
                 if data.find(uri) == 6:
                     mode = m
+                    m.mode = mode
             for c1 in colours.index.keys():
                 uri = f'/primary_colour/{c1}'
                 if data.find(uri) == 6:
                     primary_colour = c1
+                    m.primary_colour = primary_colour
             for c2 in colours.index.keys():
                 uri = f'/secondary_colour/{c2}'
                 if data.find(uri) == 6:
                     secondary_colour = c2
+                    m.secondary_colour = secondary_colour
             if data.find('/period_ms/') == 6:
                 period_ms = int(data[17:data.find(' ', 17)])
-            response = html.format(mode, primary_colour, secondary_colour, period_ms)
+                m.period_ms = period_ms
 
+            # Generate HTTP Response
+            response = html.format(m.mode, m.primary_colour, m.secondary_colour, m.period_ms)
             client_sock.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
             client_sock.send(response)
             client_sock.close()
