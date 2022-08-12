@@ -119,7 +119,7 @@ class RainbowMode(BaseTimeMode):
         self.G = self.rainbow(2 * math.pi / 3)
         self.B = self.rainbow(4 * math.pi / 3)
 
-
+# TODO: Remove mode constructor parameters, set initialisations to None type and pull from controller model for init.
 modes = {
     "Solid": SolidMode(colours.index["Red"]),
     "Pulse": PulseMode(5000, colours.index["Red"]),

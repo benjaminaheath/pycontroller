@@ -1,4 +1,6 @@
 from machine import PWM, Pin
+
+import colours
 import mode
 import time
 
@@ -6,10 +8,16 @@ import time
 class PyController:
     def __init__(self, pin_r, pin_g, pin_b):
         # Initialise controller model attributes
-        self.mode = None
-        self.primary_colour = None
-        self.secondary_colour = None
-        self.period_ms = None
+        self.mode = mode.modes["Rainbow"]
+        self.primary_colour = colours.index["Red"]
+        self.secondary_colour = colours.index["Red"]
+        self.period_ms = 10000
+        # Updated flags for when server receives a GET request:
+        # true at startup to update mode initialisation
+        self.primary_colour_updated = True
+        self.secondary_colour_updated = True
+        self.period_ms_updated = True
+        # TODO: Implement detection of model update in mode classes
 
         # Configure Pins as Pin Objects
         self.Pin_R = Pin(pin_r)
